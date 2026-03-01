@@ -1,0 +1,36 @@
+services:
+    mariadb:
+        secrets:
+            - db_password
+            - db_root_password
+        container_name: mariadb
+        image: mariadb
+        build:
+            context: requirements/mariadb
+            dockerfile: mariadb.Dockerfile
+        restart: always
+        networks:
+            - inception
+        volumes:
+            - mariadb:/var/lib/mysql
+        env_file:
+            - .env
+
+# Volumes conf
+volumes:
+    mariadb:
+        driver: local
+        driver_opts:
+            type: none # Tag to don't have a filesystem managing, but the volume I'm making
+            device: /home/hbourlot/data/mariadb
+            o: bind
+
+networks:
+    inception:
+        driver: bridge
+
+secrets:
+    db_password:
+        file: ../secrets/db_password.txt
+    db_root_password:
+        file: ../secrets/db_root_password.txt
