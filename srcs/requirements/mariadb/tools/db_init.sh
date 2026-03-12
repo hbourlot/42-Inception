@@ -13,7 +13,7 @@ if [ ! -d "/var/lib/mysql/mysql" ]; then
     mysql_install_db --user=mysql --datadir=/var/lib/mysql
 
     # Start the server to create the users
-    /usr/bin/mysqld_safe --datadir=/var/lib/mysql &
+    cd '/usr' ; /usr/bin/mariadbd-safe --datadir='/var/lib/mysql' &
     
     # Wait to open the server
     sleep 5
@@ -37,4 +37,4 @@ EOF
 fi
 
 echo "Starting the Mariadb Safe..."
-exec /usr/bin/mysqld_safe --datadir=/var/lib/mysql
+exec mariadbd-safe --datadir=/var/lib/mysql

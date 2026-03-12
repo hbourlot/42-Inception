@@ -16,6 +16,37 @@ services:
         env_file:
             - .env
 
+    wordpress:
+        container_name: wordpress
+        depends_on:
+            - mariadb
+        # image: wordpress:6.9.4-php8.2-fpm-alpine
+        image: wordpress:6.9.4-php8.2-apache
+        restart: always
+        env_file:
+            - .env
+        environment:
+            - WORDPRESS_DB_HOST=mariadb:3306
+            - WORDPRESS_DB_USER=${MYSQL_USER}
+            - WORDPRESS_DB_PASSWORD=${MYSQL_PASSWORD}
+            - WORDPRESS_DB_NAME=${MYSQL_DATABASE}
+        volumes:
+            - wordpress:/var/www/html
+        networks:
+            - inception
+        ports:
+            - "8081:80"
+    nginx:
+        container_name: nginx
+        image: nginx
+        build:
+            context: requirements/nginx
+            dockerfile: nginx.Dockerfile
+        ports:
+            - "8080:80"
+        volumes:
+            - ./requirements/nginx/conf/nginx.conf:/etc/nginx/nginx.conf:ro
+
 # Volumes conf
 volumes:
     mariadb:
@@ -24,6 +55,8 @@ volumes:
             type: none # Tag to don't have a filesystem managing, but the volume I'm making
             device: /home/hbourlot/data/mariadb
             o: bind
+    wordpress:
+        driver: local
 
 networks:
     inception:
