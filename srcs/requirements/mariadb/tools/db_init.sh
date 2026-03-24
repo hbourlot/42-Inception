@@ -36,5 +36,5 @@ EOF
     sleep 2
 fi
 
-echo "Starting the Mariadb Safe..."
+echo "Starting Mariadb ✅..."
 exec mariadbd-safe --datadir=/var/lib/mysql

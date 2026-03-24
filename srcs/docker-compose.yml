@@ -17,50 +17,62 @@ services:
             - .env
 
     wordpress:
+        secrets:
+            - db_password
         container_name: wordpress
         depends_on:
             - mariadb
-        # image: wordpress:6.9.4-php8.2-fpm-alpine
-        image: wordpress:6.9.4-php8.2-apache
+        image: wordpress
+        build:
+            context: requirements/wordpress
+            dockerfile: wordpress.Dockerfile
         restart: always
         env_file:
             - .env
         environment:
             - WORDPRESS_DB_HOST=mariadb:3306
             - WORDPRESS_DB_USER=${MYSQL_USER}
-            - WORDPRESS_DB_PASSWORD=${MYSQL_PASSWORD}
+            - WORDPRESS_DB_PASSWORD_FILE=/run/secrets/db_password
             - WORDPRESS_DB_NAME=${MYSQL_DATABASE}
         volumes:
             - wordpress:/var/www/html
         networks:
             - inception
-        ports:
-            - "8081:80"
+
     nginx:
         container_name: nginx
+        restart: always
+        depends_on:
+            - wordpress
         image: nginx
         build:
             context: requirements/nginx
             dockerfile: nginx.Dockerfile
         ports:
-            - "8080:80"
+            - "8080:443"
         volumes:
+            - wordpress:/var/www/html
             - ./requirements/nginx/conf/nginx.conf:/etc/nginx/nginx.conf:ro
-
+        networks:
+            - inception
 # Volumes conf
 volumes:
     mariadb:
         driver: local
         driver_opts:
-            type: none # Tag to don't have a filesystem managing, but the volume I'm making
-            device: /home/hbourlot/data/mariadb
+            type: none
+            device: /Users/hugobourlot/data/mariadb
             o: bind
     wordpress:
         driver: local
+        driver_opts:
+            type: none
+            device: /Users/hugobourlot/data/wordpress
+            o: bind
 
 networks:
     inception:
-        driver: bridge
+        driver: bridge # or host, none, overlay, macvlan
 
 secrets:
     db_password:
