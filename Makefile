@@ -11,6 +11,9 @@ DB_SCRIPT_PATH = srcs/requirements/mariadb/tools/db_init.sh
 
 
 COMPOSE_FILE = srcs/docker-compose.yml
+COMPOSE_PROJECT = srcs
+WP_VOLUME = $(COMPOSE_PROJECT)_wordpress
+DB_VOLUME = $(COMPOSE_PROJECT)_mariadb
 
 RESET = \033[0m
 BOLD = \033[1m
@@ -19,7 +22,7 @@ YELLOW = \033[0;33m
 BLUE = \033[0;34m
 RED = \033[0;31m
 
-.PHONY: all check-script build clean
+.PHONY: all check-script build clean clean-images fclean re
 
 all: check-script build
 
@@ -39,8 +42,20 @@ build:
 
 clean:
 	@printf "$(RED)$(BOLD)Cleaning containers and volumes...$(RESET)\n"
-	@docker compose -f $(COMPOSE_FILE) down -v
+	@docker compose -f $(COMPOSE_FILE) down --volumes --remove-orphans
 	@rm -rf $(WP_DATA)
 	@rm -rf $(DB_DATA)
 	@printf "$(GREEN)✔ Clean completed$(RESET)\n"
 
+clean-images:
+	@printf "$(RED)$(BOLD)Removing compose images...$(RESET)\n"
+	@docker compose -f $(COMPOSE_FILE) down --rmi all --remove-orphans
+	@printf "$(GREEN)✔ Images removed$(RESET)\n"
+
+fclean: clean clean-images
+	@printf "$(RED)$(BOLD)Resetting compose volumes...$(RESET)\n"
+	@docker volume rm -f $(WP_VOLUME) $(DB_VOLUME) >/dev/null 2>&1 || true
+	@printf "$(GREEN)✔ Full clean completed$(RESET)\n"
+
+
+re: fclean all

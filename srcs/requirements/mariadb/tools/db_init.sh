@@ -1,40 +1,51 @@
-#!/bin/sh
+#!/bin/bash
 
-# Reads the passwords
+# Read secrets
 MYSQL_PASSWORD=$(cat /run/secrets/db_password)
 MYSQL_ROOT_PASSWORD=$(cat /run/secrets/db_root_password)
 
-# Check if the database is started
-if [ ! -d "/var/lib/mysql/mysql" ]; then
-    
-    echo "Initializing MariaDB..."
-    
-    # Install the data system
-    mysql_install_db --user=mysql --datadir=/var/lib/mysql
+# Get database info from environment
+MYSQL_DATABASE=${MYSQL_DATABASE:-wordpress_db}
+MYSQL_USER=${MYSQL_USER:-wordpress}
 
-    # Start the server to create the users
+# Check if database is already initialized
+if [ ! -d "/var/lib/mysql/mysql" ]; then
+    # echo "Initializing MariaDB..."
+    mariadb-install-db --user=mysql --datadir=/var/lib/mysql
+    
+    # Start MariaDB temporarily
     cd '/usr' ; /usr/bin/mariadbd-safe --datadir='/var/lib/mysql' &
     
-    # Wait to open the server
-    sleep 5
+    # Wait for MariaDB to start
+    echo "Waiting for MariaDB to start..."
+    for i in {1..30}; do
+        if mysqladmin ping -h localhost --silent 2>/dev/null; then
+            break
+        fi
+        sleep 1
+    done
 
-    # Criate a temp file to SQL configs
-    cat << EOF > /tmp/init_db.sql
+    # Create initialization SQL
+    echo "Setting up database and users..."
+    /usr/bin/mariadb -u root << EOF
 FLUSH PRIVILEGES;
-ALTER USER 'root'@'localhost' IDENTIFIED BY '$MYSQL_ROOT_PASSWORD';
-CREATE DATABASE IF NOT EXISTS $MYSQL_DATABASE;
-CREATE USER IF NOT EXISTS '$MYSQL_USER'@'%' IDENTIFIED BY '$MYSQL_PASSWORD';
-GRANT ALL PRIVILEGES ON $MYSQL_DATABASE.* TO '$MYSQL_USER'@'%';
+ALTER USER 'root'@'localhost' IDENTIFIED BY '${MYSQL_ROOT_PASSWORD}';
+CREATE DATABASE IF NOT EXISTS ${MYSQL_DATABASE};
+CREATE USER IF NOT EXISTS '${MYSQL_USER}'@'%' IDENTIFIED BY '${MYSQL_PASSWORD}';
+GRANT ALL PRIVILEGES ON ${MYSQL_DATABASE}.* TO '${MYSQL_USER}'@'%';
 FLUSH PRIVILEGES;
 EOF
     
-    # Execute SQL
-    mysql -u root --password="" < /tmp/init_db.sql
+    # Shutdown temporary server
+    /usr/bin/mariadb-admin -u root -p${MYSQL_ROOT_PASSWORD} shutdown
     
-    # Stop the temp server safe
-    mysqladmin -u root -p$MYSQL_ROOT_PASSWORD shutdown
-    sleep 2
+    echo "MariaDB initialized successfully!"
+else
+    echo "MariaDB already initialized."
 fi
 
-echo "Starting Mariadb ✅..."
-exec mariadbd-safe --datadir=/var/lib/mysql
+sleep 2
+
+# Start MariaDB normally
+echo "Starting MariaDB server..."
+exec /usr/bin/mariadbd --user=mysql --datadir=/var/lib/mysql
