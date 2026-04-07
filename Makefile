@@ -1,8 +1,8 @@
 
 
-LOGIN = hugobourlot
+LOGIN = hbourlot
 
-DATA_PATH = /Users/$(LOGIN)/data
+DATA_PATH = /home/$(LOGIN)/data
 WP_DATA = $(DATA_PATH)/wordpress
 DB_DATA = $(DATA_PATH)/mariadb
 
@@ -43,8 +43,8 @@ build:
 clean:
 	@printf "$(RED)$(BOLD)Cleaning containers and volumes...$(RESET)\n"
 	@docker compose -f $(COMPOSE_FILE) down --volumes --remove-orphans
-	@rm -rf $(WP_DATA)
-	@rm -rf $(DB_DATA)
+	@sudo rm -rf $(WP_DATA)
+	@sudo rm -rf $(DB_DATA)
 	@printf "$(GREEN)✔ Clean completed$(RESET)\n"
 
 clean-images:
@@ -57,5 +57,8 @@ fclean: clean clean-images
 	@docker volume rm -f $(WP_VOLUME) $(DB_VOLUME) >/dev/null 2>&1 || true
 	@printf "$(GREEN)✔ Full clean completed$(RESET)\n"
 
+
+wordpress:
+	@docker compose -f $(COMPOSE_FILE) up --build -d wordpress
 
 re: fclean all

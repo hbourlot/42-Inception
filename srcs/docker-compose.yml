@@ -54,7 +54,7 @@ services:
         volumes:
             - wordpress:/var/www/html
             - ./requirements/nginx/conf/nginx.conf:/etc/nginx/nginx.conf:ro
-        networks:
+        networks:       
             - inception
 # Volumes conf
 volumes:
@@ -62,13 +62,13 @@ volumes:
         driver: local
         driver_opts:
             type: none
-            device: /Users/hugobourlot/data/mariadb
+            device: /home/hbourlot/data/mariadb
             o: bind
     wordpress:
         driver: local
         driver_opts:
             type: none
-            device: /Users/hugobourlot/data/wordpress
+            device: /home/hbourlot/data/wordpress
             o: bind
 
 networks:

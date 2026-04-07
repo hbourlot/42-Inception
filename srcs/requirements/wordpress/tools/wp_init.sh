@@ -6,6 +6,7 @@ DB_PASS=$(cat /run/secrets/db_password)
 
 mkdir -p "$WP_PATH"
 
+echo $WP_URL
 # Loading credentials if they exist
 [ -f "/run/secrets/credentials" ] && . /run/secrets/credentials
 
@@ -13,11 +14,13 @@ mkdir -p "$WP_PATH"
 : "${WORDPRESS_DB_HOST:=mariadb:3306}"
 : "${WORDPRESS_DB_NAME:=wordpress_db}"
 : "${WORDPRESS_DB_USER:=wordpress}"
-: "${WP_URL:=https://localhost}"
+: "${WP_URL:=https://hbourlot.42.fr}"
 : "${WP_TITLE:=Inception}"
 : "${WP_ADMIN_USER:=sina}"
 : "${WP_ADMIN_EMAIL:=sina@revelacao.com}"
-: "${WP_ADMIN_PASSWORD:?WP_ADMIN_PASSWORD must be set via secrets or env}"
+: "${WP_ADMIN_PASSWORD:?WP_ADMIN_PASSWORD must be set via secrets}"
+: "${WP_USER_PASSWORD:?WP_USER_PASSWORD must be set via secrets}"
+
 
 # Checking if WordPress is COMPLETELY installed (not just config)
 if ! wp core is-installed --path="$WP_PATH" --allow-root 2>/dev/null; then
@@ -49,7 +52,7 @@ if ! wp core is-installed --path="$WP_PATH" --allow-root 2>/dev/null; then
     until wp db check --path="$WP_PATH" --allow-root 2>/dev/null; do
         sleep 2
     done
-    
+
     # Installing WordPress
     wp core install \
         --path="$WP_PATH" \
@@ -59,6 +62,9 @@ if ! wp core is-installed --path="$WP_PATH" --allow-root 2>/dev/null; then
         --admin_password="$WP_ADMIN_PASSWORD" \
         --admin_email="$WP_ADMIN_EMAIL" \
         --allow-root
+
+    # Installing WordPress
+    wp user create $WP_USER $WP_USER_EMAIL --role=author --path="$WP_PATH" --user_pass="$WP_USER_PASSWORD"
     
     echo "WordPress installed successfully"
 else
