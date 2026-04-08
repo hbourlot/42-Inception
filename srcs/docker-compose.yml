@@ -31,9 +31,8 @@ services:
         env_file:
             - .env
         environment:
-            - WORDPRESS_DB_HOST=mariadb:3306
+            - WORDPRESS_DB_HOST=mariadb:${DB_PORT}
             - WORDPRESS_DB_USER=${MYSQL_USER}
-            - WORDPRESS_DB_PASSWORD_FILE=/run/secrets/db_password
             - WORDPRESS_DB_NAME=${MYSQL_DATABASE}
         volumes:
             - wordpress:/var/www/html
@@ -54,7 +53,7 @@ services:
         volumes:
             - wordpress:/var/www/html
             - ./requirements/nginx/conf/nginx.conf:/etc/nginx/nginx.conf:ro
-        networks:       
+        networks:
             - inception
 # Volumes conf
 volumes:
@@ -62,13 +61,13 @@ volumes:
         driver: local
         driver_opts:
             type: none
-            device: /home/hbourlot/data/mariadb
+            device: ${DB_DATA_PATH}
             o: bind
     wordpress:
         driver: local
         driver_opts:
             type: none
-            device: /home/hbourlot/data/wordpress
+            device: ${WP_DATA_PATH}
             o: bind
 
 networks:

@@ -25,15 +25,6 @@ echo $WP_URL
 # Checking if WordPress is COMPLETELY installed (not just config)
 if ! wp core is-installed --path="$WP_PATH" --allow-root 2>/dev/null; then
     echo "Installing WordPress..."
-    
-    # # Downloading core if missing ( But in Downloading in the DOCKERFILE )
-    # if [ ! -f "$WP_PATH/wp-settings.php" ] || [ ! -f "$WP_PATH/wp-includes/Requests/src/Autoload.php" ]; then
-    #     if [ ! -f /tmp/wordpress.tar.gz ]; then
-    #         wget -qO /tmp/wordpress.tar.gz https://wordpress.org/latest.tar.gz
-    #     fi
-    #     mkdir -p "$WP_PATH"
-    #     tar -xzf /tmp/wordpress.tar.gz -C "$WP_PATH" --strip-components=1
-    # fi
 
     # Creating config
     if [ ! -f "$WP_PATH/wp-config.php" ]; then
