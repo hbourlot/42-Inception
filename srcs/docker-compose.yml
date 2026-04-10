@@ -7,7 +7,7 @@ services:
         image: mariadb:${MARIADB_IMAGE_TAG}
         build:
             context: requirements/mariadb
-            dockerfile: mariadb.Dockerfile
+            dockerfile: Dockerfile
         restart: always
         networks:
             - inception
@@ -26,7 +26,7 @@ services:
         image: wordpress:${WORDPRESS_IMAGE_TAG}
         build:
             context: requirements/wordpress
-            dockerfile: wordpress.Dockerfile
+            dockerfile: Dockerfile
         restart: always
         env_file:
             - .env
@@ -47,7 +47,7 @@ services:
         image: nginx:${NGINX_IMAGE_TAG}
         build:
             context: requirements/nginx
-            dockerfile: nginx.Dockerfile
+            dockerfile: Dockerfile
         ports:
             - "443:443"
         volumes:

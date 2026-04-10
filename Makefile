@@ -56,4 +56,8 @@ fclean: clean clean-images
 wordpress:
 	@docker compose -f $(COMPOSE_FILE) up --build -d wordpress
 
+mariadb:
+	@docker compose -f $(COMPOSE_FILE) up --build -d mariadb
+
+
 re: fclean all
