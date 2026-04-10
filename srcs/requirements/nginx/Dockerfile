@@ -8,6 +8,9 @@ RUN mkdir -p /var/lib/nginx /var/www/html \
 	&& chown -R nginx:nginx /var/lib/nginx /var/www
 
 COPY ./tools/nginx_gen.sh /usr/local/bin/nginx_gen.sh
+
+COPY ./conf/nginx.conf /etc/nginx/nginx.conf
+
 RUN chmod +x /usr/local/bin/nginx_gen.sh
 
 EXPOSE 443
